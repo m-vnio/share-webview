@@ -1,5 +1,5 @@
 const root      = document.getElementById('root')
-const socket    = io('https://0hb7ghwq-5000.brs.devtunnels.ms/');
+const socket    = io('https://l8qn2l7t-5001.brs.devtunnels.ms/');
 const $template = document.createElement('div')
 
 if( !localStorage.getItem('codigo') ) localStorage.setItem('codigo', '')
@@ -14,6 +14,10 @@ const findId    = (id) => {
 }
 
 const component$r =()=>{
+
+    const url = new URL(window.location.href);
+    const queryParams = url.searchParams;
+
     $template.innerHTML = `
         <div class="div_OSKBCD">
             <input type="hidden" id="link" readonly>
@@ -41,13 +45,17 @@ const component$r =()=>{
     const itemLink  = findId('itemLink')
     const id        = Date.now()
 
+    const Links     = []
+
     const contenedorButton = findId('contenedorButton')
 
     new QRCode(recibir, location.origin + location.pathname + '?e=' + queryParams.get('r') + '&ip=' + queryParams.get('ip'));
 
     const renderItemLink =( ip )=>{
-        // if( ip == 'null' ) return
+        if( ip == 'null' ) return
         const link = `http://${ ip }:4445/${ id }.mkv`
+        if( Links.some( link_ => link_ == link ) ) return
+        Links.push( link )
 
         itemLink.insertAdjacentHTML('beforeend', `
             <button class="button_q623lM2" data-link="${ link }">
@@ -56,14 +64,13 @@ const component$r =()=>{
             </button>
         `)
     }
-     
+    
     socket.on('connecting', data => {
         data = JSON.parse(data)
 
         if( data.id == queryParams.get('r') ) {
             renderItemLink( data.message )
         }
-            
     });
 
     socket.on('sending', data => {
@@ -146,6 +153,10 @@ const component$r =()=>{
 }
 
 const component$e =()=>{
+
+    const url = new URL(window.location.href);
+    const queryParams = url.searchParams;
+
     $template.innerHTML = `
         <div class="div_OSKBCD">
             <input type="hidden" id="link" readonly>
@@ -176,6 +187,7 @@ const component$e =()=>{
         id: queryParams.get('e'),
         message : queryParams.get('me-ip')
     }));
+    
 
     itemLink.addEventListener('click', e => {
         const button = e.target.closest('button')
@@ -203,8 +215,8 @@ const component$root =()=>{
         return component$e()
     }
 
-    location.href = location.origin + location.pathname + '?r=' + Date.now() + '&ip=' + queryParams.get('ip')
-    return ''
+    history.replaceState(null, null, location.origin + location.pathname + '?r=' + Date.now() + '&ip=' + queryParams.get('ip'))
+    return component$r()
     
 }
 
