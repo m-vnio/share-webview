@@ -10,8 +10,8 @@ body {
 }
 
 #root {
-  width: 100%;
-  height: 100dvh;
+  position: fixed;
+  inset: 0;
 
   padding: 10px;
   display: flex;
@@ -64,12 +64,12 @@ body {
   pointer-events: none;
 
   overflow: hidden;
+}
 
-  & img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
+.div_1ecjzLK img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .div_HBUafNB {
@@ -79,21 +79,21 @@ body {
   gap: 10px;
 
   overflow: hidden;
+}
 
-  & button {
-    height: 60px;
-    border-radius: 15px;
-    border: 3px solid #424243;
-    outline: none;
-    font-size: 15px;
+.div_HBUafNB button {
+  height: 60px;
+  border-radius: 15px;
+  border: 3px solid #424243;
+  outline: none;
+  font-size: 15px;
 
-    background: #424243;
-    color: #ffffff;
+  background: #424243;
+  color: #ffffff;
+}
 
-    &:focus {
-      border: 3px solid #ffffff;
-    }
-  }
+.div_HBUafNB button:focus {
+  border: 3px solid #ffffff;
 }
 
 .div_ko7wWU {
@@ -122,24 +122,24 @@ body {
 
   border-radius: 15px;
   border: 3px solid #424243;
-
-  &:focus {
-    border: 3px solid #ffffff;
-  }
-
-  & p {
-    font-size: 15px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-
-  & span {
-    font-size: 13px;
-  }
 }
 
-@media (width < 800px) {
+.button_q623lM2 p {
+  font-size: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.button_q623lM2 span {
+  font-size: 13px;
+}
+
+.button_q623lM2:focus {
+  border: 3px solid #ffffff;
+}
+
+@media (max-width: 800px) {
   .div_OSKBCD {
     width: 100%;
     height: 100%;
@@ -160,3 +160,4 @@ body {
   }
 }
 
+/* div_HBUafNB */

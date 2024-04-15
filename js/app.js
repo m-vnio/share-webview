@@ -19,7 +19,7 @@ const component$r =()=>{
             <input type="hidden" id="link" readonly>
             <div id="contenedorButton" class="div_EYpSdgc">
                 <div class="div_HBUafNB">
-                    <button id="openWith"><i class="fi fi-rr-play"></i></button>
+                    <button id="openWith" class="button-focus"><i class="fi fi-rr-play"></i></button>
                     <button id="copy"><i class="fi fi-rr-copy"></i></button>
                     <button id="share"><i class="fi fi-rr-share"></i></button>
                 </div>
@@ -93,7 +93,10 @@ const component$r =()=>{
         if( button ) {
 
             const link = button.getAttribute('data-link')
-            Android.openWithApp( link )
+
+            if( link ) {
+                Android.openWithApp( link )
+            }
 
         }
     })
@@ -116,10 +119,18 @@ const component$r =()=>{
 
         if( ['ArrowUp', 'ArrowLeft'].includes( e.key ) ) {
             if( ( index - 1 ) > -1 ) buttons[ index - 1 ].focus()
+            else buttons[ buttons.length - 1 ].focus()
         }
 
         else if( ['ArrowDown', 'ArrowRight'].includes( e.key ) ) {
             if( ( index + 1 ) < buttons.length ) buttons[ index + 1 ].focus()
+            else buttons[0].focus()
+        } 
+
+        else if( [ 'Enter' ].includes( e.key ) ) {
+
+            const link = buttons[ index ].getAttribute('data-link')
+            Android.openWithApp( link )
         } 
 
         else {
@@ -130,7 +141,7 @@ const component$r =()=>{
 
     setTimeout(()=> openWith.focus())
     renderItemLink( queryParams.get('ip') )
-
+ 
     return $element
 }
 
@@ -193,14 +204,10 @@ const component$root =()=>{
     }
 
     location.href = location.origin + location.pathname + '?r=' + Date.now() + '&ip=' + queryParams.get('ip')
-    return 'sdaf'
+    return ''
     
 }
 
 addEventListener('DOMContentLoaded', ()=> {
     document.getElementById('root').append(component$root())
 })
-
-
-
-
