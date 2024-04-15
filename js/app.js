@@ -56,7 +56,7 @@ const component$r =()=>{
     
 
     const renderItemLink =( ip )=>{
-        if( ip == 'null' ) return
+        //if( ip == 'null' ) return
         const link = getLink(ip, 4445, id)
         
         if( Links.some( link_ => link_ == link ) ) return
@@ -142,9 +142,12 @@ const component$r =()=>{
         else if( [ 'Enter' ].includes( e.key ) ) {
 
             const link = buttons[ index ].getAttribute('data-link')
-            Android.openWithApp( link )
-        } 
 
+            if( [ openWith, copy, share ].includes( buttons[ index ] ) ) buttons[ index ].dispatchEvent(new CustomEvent('click'))
+            else Android.openWithApp( link )
+
+        } 
+        
         else {
             if( ( index + 1 ) < buttons.length ) buttons[ index + 1 ].focus()
             else buttons[ 0 ].focus()
