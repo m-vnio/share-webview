@@ -1,0 +1,162 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #1c1c1e;
+  user-select: none;
+}
+
+#root {
+  width: 100%;
+  height: 100dvh;
+
+  padding: 10px;
+  display: flex;
+}
+
+.div_OSKBCD {
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  width: min(100%, 750px);
+  max-height: 100%;
+
+  border-radius: 15px;
+
+  transition: box-shadow 0.3s ease;
+
+  overflow: hidden;
+}
+
+.div_EYpSdgc {
+  aspect-ratio: 1/1;
+  background: #2c2c2e;
+
+  display: grid;
+  grid-template-rows: auto 1fr;
+  padding: 10px;
+  gap: 10px;
+
+  height: 100%;
+
+  border-radius: 15px;
+}
+
+.div_1ecjzLK {
+  aspect-ratio: 1/1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: none;
+  padding: 15px;
+
+  border-radius: 15px;
+  transition: filter 0.3s ease;
+
+  background: #ffffff;
+
+  pointer-events: none;
+
+  overflow: hidden;
+
+  & img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.div_HBUafNB {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-radius: 15px;
+  gap: 10px;
+
+  overflow: hidden;
+
+  & button {
+    height: 60px;
+    border-radius: 15px;
+    border: 3px solid #424243;
+    outline: none;
+    font-size: 15px;
+
+    background: #424243;
+    color: #ffffff;
+
+    &:focus {
+      border: 3px solid #ffffff;
+    }
+  }
+}
+
+.div_ko7wWU {
+  border-radius: 15px;
+  gap: 10px;
+  overflow-y: auto;
+
+  display: flex;
+  flex-direction: column;
+  scrollbar-width: none;
+}
+
+.button_q623lM2 {
+  background: #424243;
+  color: #ffffff;
+
+  border: none;
+  outline: none;
+
+  width: 100%;
+  min-height: 60px;
+  text-align: left;
+  padding: 0 20px;
+
+  overflow: hidden;
+
+  border-radius: 15px;
+  border: 3px solid #424243;
+
+  &:focus {
+    border: 3px solid #ffffff;
+  }
+
+  & p {
+    font-size: 15px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  & span {
+    font-size: 13px;
+  }
+}
+
+@media (width < 800px) {
+  .div_OSKBCD {
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  .div_1ecjzLK {
+    margin: auto;
+    aspect-ratio: initial;
+    height: auto;
+  }
+
+  .div_EYpSdgc {
+    flex: 1;
+    aspect-ratio: initial;
+  }
+}
+
