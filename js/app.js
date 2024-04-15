@@ -15,6 +15,8 @@ const findId    = (id) => {
 
 const component$r =()=>{
 
+    const getLink =( ip, port, name )=> `http://${ ip }:${port}/${ name }.mkv`
+
     const url = new URL(window.location.href);
     const queryParams = url.searchParams;
 
@@ -36,7 +38,7 @@ const component$r =()=>{
 
     const recibir   = findId('recibir')
     const link      = findId('link')
-    link.value      = `http://${ queryParams.get('ip') }:4445/${ Date.now() }`
+    link.value      = getLink(queryParams.get('ip'), 4445, Date.now())
 
     const openWith  = findId('openWith')
     const copy      = findId('copy')
@@ -51,9 +53,12 @@ const component$r =()=>{
 
     new QRCode(recibir, location.origin + location.pathname + '?e=' + queryParams.get('r') + '&ip=' + queryParams.get('ip'));
 
+    
+
     const renderItemLink =( ip )=>{
         if( ip == 'null' ) return
-        const link = `http://${ ip }:4445/${ id }.mkv`
+        const link = getLink(ip, 4445, id)
+        
         if( Links.some( link_ => link_ == link ) ) return
         Links.push( link )
 
@@ -83,7 +88,7 @@ const component$r =()=>{
     });
 
     openWith.addEventListener('click', ()=> {
-        Android.openWithDefault( link.value )
+        Android.openWithDefault( getLink(queryParams.get('ip'), 4445, Date.now()) )
     })
 
     copy.addEventListener('click', ()=> {
@@ -154,6 +159,8 @@ const component$r =()=>{
 
 const component$e =()=>{
 
+    const getLink =( ip, port, name )=> `http://${ ip }:${port}/${ name }.mkv`
+
     const url = new URL(window.location.href);
     const queryParams = url.searchParams;
 
@@ -173,7 +180,8 @@ const component$e =()=>{
 
     const renderItemLink =( ip )=>{
         if( ip == 'null' ) return
-        const link = `http://${ ip }:4445/${ id }.mkv`
+
+        const link = getLink(ip, 4445, id)
 
         itemLink.insertAdjacentHTML('beforeend', `
             <button class="button_q623lM2" data-link="${ link }">
