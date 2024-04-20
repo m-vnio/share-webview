@@ -25,16 +25,13 @@ function genereteKey ( length = 7 ){
     return Array( length ).fill('').map( () => generate[ rand( generate.length - 1 ) ]).join('')
     
 }
-
-function getLink(ip, port, name) {
-    return `http://${ ip }:${port}/${ name }.mkv`
-}
-
+ 
 function renderItemLink ( data = {}, id = null ) {
-    const link = getLink(data.ip, 4445, Date.now())
+
+    const link = `http://${ data.ip }:${4445}`
 
     return `
-        <div class="div_8HE7EX5" data-link="${ link }" data-id="id-${ id }" data-focus>
+        <div class="div_8HE7EX5" data-link="${ link }/${ Date.now() }.mkv" data-link-play="${ link }" data-id="id-${ id }" data-focus>
             <div class="div_6Ej8ouG">
                 <img src="${ data.image ?? '' }" alt="" style="${ data.image ? '' : 'visibility:hidden'}">
                 <p>${ link }</p>
@@ -49,6 +46,16 @@ function renderItemLink ( data = {}, id = null ) {
     `
 }
 
+function datetimeAdd() {
+    const date = new Date()
+    date.setDate( date.getDate() + 1 )
+    date.setHours(0)
+    date.setMinutes(0)
+    date.setSeconds(0)
+    date.setMilliseconds(0)
+    return date.getTime()
+}
+
 const component$r =()=> {
 
     const url = new URL(window.location.href);
@@ -58,8 +65,10 @@ const component$r =()=> {
         <div class="div_OSKBCD">
             <div class="div_rz0K7v">
                 <div class="div_iSIvEga">
-                    <img id="imageProfile" src="https://picsum.photos/40/40">
-                    <input type="text" id="codigoInput" value="" readonly>
+                    <div class="div_1yWpJY">
+                        <img id="imageProfile" src="https://picsum.photos/40/40">
+                        <input type="text" id="codigoInput" value="" readonly>
+                    </div>
                     <button id="codigo"><i class="fi fi-rr-password"></i></button>
                 </div>
                 <div id="contenedorButton" class="div_EYpSdgc" >
@@ -75,7 +84,7 @@ const component$r =()=> {
     `
     const $element = $template.children[0]
 
-    const itemLink  = findId('itemLink')
+    const itemLink      = findId('itemLink')
 
     const imageProfile  = findId('imageProfile')
 
@@ -88,11 +97,10 @@ const component$r =()=> {
 
     let focusElement = null
 
-
-    const actionButton =( action, link )=>{
+    const actionButton =( action, link, linkPlay )=>{
 
         if( action == 'openDefault' ) {
-            Android.openWithDefault( link )
+            Android.openWithDefault( `${linkPlay}/${ Date.now() }.mkv` )
         } 
         
         else if( action == 'openWith' ) {
@@ -109,9 +117,10 @@ const component$r =()=> {
     }
 
     codigo.addEventListener('click', ()=> {
-        const code = prompt('ingrese el codigo')
+        const code = prompt('Ingrese el codigo')
         if( !code ) return
         if( code.trim() == '' ) return
+        localStorage.setItem('code', code)
         location.href = `${ location.origin }${ location.pathname }?code=${ code }&me-ip=${ queryParams.get('ip') }&ip=${ queryParams.get('ip') }`
     })
 
@@ -134,16 +143,24 @@ const component$r =()=> {
 
         if( button ) {
             const action = button.getAttribute('data-action')
-            const link   = button.closest('[ data-link ]').getAttribute('data-link')
-            actionButton( action, link )
+            const link      = button.closest('[ data-link ]').getAttribute('data-link')
+            const linkPlay  = button.closest('[ data-link ]').getAttribute('data-link-play')
+            actionButton( action, link, linkPlay )
         } 
         else if( focusElement ) { setTimeout(()=> focusElement.focus()) }
 
         
     })
 
+    addEventListener('keypress', e => {
+        e.preventDefault()
+        console.log('hola');
+    })
+
     addEventListener('keydown', e => {
         e.preventDefault()
+
+        if( !focusElement ) return
 
         const dataFocus = contenedorButton.querySelector('[ data-focus = true ]')
         const buttons = Array.from( dataFocus.querySelectorAll('button') )
@@ -188,7 +205,8 @@ const component$r =()=> {
 
             const action = buttons[index].getAttribute('data-action')
             const link   = dataFocus.getAttribute('data-link')
-            actionButton( action, link )
+            const linkPlay   = dataFocus.getAttribute('data-link-play')
+            actionButton( action, link, linkPlay )
            
         } 
     })
@@ -229,18 +247,26 @@ const component$root =()=>{
     const url = new URL(window.location.href);
     const queryParams = url.searchParams;
 
-
-    if( queryParams.get('code') ) {
-        return component$r()
-    }
- 
-    history.replaceState(null, null, location.origin + location.pathname + '?code=' + genereteKey(5) + '&ip=' + queryParams.get('ip'))
+    history.replaceState(null, null, `${ location.origin + location.pathname }?code=${ localStorage.getItem('code') }&ip=${ queryParams.get('ip') }`)
     return component$r()
     
 }
 
 addEventListener('DOMContentLoaded', ()=> {
-    document.getElementById('root').append(component$root())
-})
 
-//div_rz0K7v
+    if( localStorage.getItem('datetime') ) {
+        if( Date.now() > parseInt( localStorage.getItem('datetime') ) ) {
+            localStorage.removeItem('code')
+            localStorage.removeItem('datetime')
+        }
+    }
+
+    if( !localStorage.getItem('datetime') )
+        localStorage.setItem('datetime', datetimeAdd())
+
+    if( !localStorage.getItem('code') )
+        localStorage.setItem('code', genereteKey(5))
+
+    document.getElementById('root').append( component$root() )
+
+})
