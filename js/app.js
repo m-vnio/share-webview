@@ -2,6 +2,9 @@ const root      = document.getElementById('root')
 const socket    = io('https://l8qn2l7t-5001.brs.devtunnels.ms/');
 const $template = document.createElement('div')
 
+const url = new URL(window.location.href);
+const queryParams = url.searchParams;
+
 const findId    = ( id ) => {
     const $element = $template.querySelector('#' + id)
     $element.removeAttribute('id')
@@ -93,7 +96,7 @@ const component$r =()=> {
     const codigo        = findId('codigo')
     codigoInput.value   = queryParams.get('code')
 
-    new QRCode(codigoQR, `${ location.origin }${ location.pathname }?code=${ codigoInput.value }`);
+    new QRCode(codigoQR, `${ location.origin }${ location.pathname }?code=${ codigoInput.value }&qr=true`);
 
     let focusElement = null
 
@@ -121,7 +124,7 @@ const component$r =()=> {
         if( !code ) return
         if( code.trim() == '' ) return
         localStorage.setItem('code', code)
-        location.href = `${ location.origin }${ location.pathname }?code=${ code }&me-ip=${ queryParams.get('ip') }&ip=${ queryParams.get('ip') }`
+        location.href = `${ location.origin + location.pathname }?code=${ code }&me-ip=${ queryParams.get('ip') }&ip=${ queryParams.get('ip') }`
     })
 
     addEventListener('focusin', e => {
@@ -244,15 +247,18 @@ const component$r =()=> {
  
 const component$root =()=>{
 
-    const url = new URL(window.location.href);
-    const queryParams = url.searchParams;
-
-    history.replaceState(null, null, `${ location.origin + location.pathname }?code=${ localStorage.getItem('code') }&ip=${ queryParams.get('ip') }`)
+    history.replaceState(null, null, `${ location.origin + location.pathname }?code=${ localStorage.getItem('code') }&ip=${ queryParams.get('ip') }&me-ip=${ queryParams.get('me-ip') }`)
     return component$r()
     
 }
 
 addEventListener('DOMContentLoaded', ()=> {
+
+    if( queryParams.get('qr') == 'true' ) {
+        if( queryParams.get('code') ) {
+            localStorage.setItem('code', queryParams.get('code'))
+        }
+    }
 
     if( localStorage.getItem('datetime') ) {
         if( Date.now() > parseInt( localStorage.getItem('datetime') ) ) {
