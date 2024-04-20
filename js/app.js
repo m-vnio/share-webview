@@ -124,7 +124,7 @@ const component$r =()=> {
         if( !code ) return
         if( code.trim() == '' ) return
         localStorage.setItem('code', code)
-        location.href = `${ location.origin + location.pathname }?code=${ code }&me-ip=${ queryParams.get('ip') }&ip=${ queryParams.get('ip') }`
+        location.reload()
     })
 
     addEventListener('focusin', e => {
@@ -225,6 +225,20 @@ const component$r =()=> {
             imageProfile.setAttribute('src', res.url)
         })
     
+
+    let connect = false
+    socket.on('connect', ()=> {
+
+        if( connect == true ) {
+            if( !itemLink.children.length ) {
+                location.reload()
+            }
+        }
+
+        connect = true
+        
+    })
+
     socket.on('user-list', Data => {
         
         itemLink.innerHTML = ''
@@ -247,7 +261,15 @@ const component$r =()=> {
  
 const component$root =()=>{
 
-    history.replaceState(null, null, `${ location.origin + location.pathname }?code=${ localStorage.getItem('code') }&ip=${ queryParams.get('ip') }&me-ip=${ queryParams.get('me-ip') }`)
+    const searchParams = ( query = {} ) => Object.keys(query).map( key => `${ key }=${ query[ key ] }` ).join('&')
+
+    const queries = {
+        code : localStorage.getItem('code'),
+        ip   : queryParams.get('me-ip') ?? queryParams.get('ip')
+    }
+
+
+    history.replaceState(null, null, `${ location.origin }${ location.pathname }?${ searchParams( queries ) }`)
     return component$r()
     
 }
