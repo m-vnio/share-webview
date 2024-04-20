@@ -28,16 +28,21 @@ function genereteKey ( length = 7 ){
     return Array( length ).fill('').map( () => generate[ rand( generate.length - 1 ) ]).join('')
     
 }
+
+function searchParams( query ) {
+    return Object.keys(query).map( key => `${ key }=${ query[ key ] }` ).join('&')
+}
  
 function renderItemLink ( data = {}, id = null ) {
 
     const link = `http://${ data.ip }:${4445}`
+    const name = Date.now()
 
     return `
-        <div class="div_8HE7EX5" data-link="${ link }/${ Date.now() }.mkv" data-link-play="${ link }" data-id="id-${ id }" data-focus>
+        <div class="div_8HE7EX5" data-link="${ link }/${ name }.mkv" data-link-play="${ link }" data-id="id-${ id }" data-focus>
             <div class="div_6Ej8ouG">
                 <img src="${ data.image ?? '' }" alt="" style="${ data.image ? '' : 'visibility:hidden'}">
-                <p>${ link }</p>
+                <p>${ link }/${ name }.mkv</p>
             </div>
             <div class="div_9cruItm">
                 <button class="button_q623lM2" data-action="openDefault"><i class="fi fi-rr-play"></i></button>
@@ -111,7 +116,7 @@ const component$r =()=> {
         }
 
         else if( action == 'copyLink' ) {
-            Android.copyText( link.value )
+            Android.copyText( link )
         }
 
         else if( action == 'shareLink' ) {
@@ -261,21 +266,6 @@ const component$r =()=> {
  
 const component$root =()=>{
 
-    const searchParams = ( query = {} ) => Object.keys(query).map( key => `${ key }=${ query[ key ] }` ).join('&')
-
-    const queries = {
-        code : localStorage.getItem('code'),
-        ip   : queryParams.get('me-ip') ?? queryParams.get('ip')
-    }
-
-
-    history.replaceState(null, null, `${ location.origin }${ location.pathname }?${ searchParams( queries ) }`)
-    return component$r()
-    
-}
-
-addEventListener('DOMContentLoaded', ()=> {
-
     if( queryParams.get('qr') == 'true' ) {
         if( queryParams.get('code') ) {
             localStorage.setItem('code', queryParams.get('code'))
@@ -294,6 +284,18 @@ addEventListener('DOMContentLoaded', ()=> {
 
     if( !localStorage.getItem('code') )
         localStorage.setItem('code', genereteKey(5))
+
+    const queries = {
+        code : localStorage.getItem('code'),
+        ip   : queryParams.get('me-ip') ?? queryParams.get('ip')
+    }
+
+    history.replaceState(null, null, `${ location.origin }${ location.pathname }?${ searchParams( queries ) }`)
+    return component$r()
+    
+}
+
+addEventListener('DOMContentLoaded', ()=> {
 
     document.getElementById('root').append( component$root() )
 
