@@ -26,7 +26,10 @@ document.getElementById('app').innerHTML = `
         <div class="div_557EbR4">
             <div class="div_6pxFPgJ">
                 <img src="" alt="" id="image">
-                <p style="color:#000000" id="ipl">-</p> 
+                <div>
+                    <p style="color:#000000" id="ipl">-</p> 
+                    <p style="color:#000000" id="test">-</p> 
+                </div>
             </div>
             <div class="div_VWyUlPI" data-ip="">
                 <button class="button_x7jX1VV one" data-action="play">${ icon.get('fi fi-rr-play') }</button>
@@ -49,6 +52,8 @@ addEventListener('keydown', e => {
         const index     = buttons.findIndex( button => button == buttonf )
 
         const num       = 4
+        
+        document.getElementById('test').textContent = e.key
 
         if( e.key == 'ArrowRight' ){
             const button = buttons.at(index + 1) ?? buttons.at(0)
