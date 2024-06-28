@@ -3,6 +3,7 @@ const icon      = new IconSVG()
 const actionButton =( action, link )=>{
 
     const linkPlay = `http://${link}/${ Date.now() }.mkv`
+    console.log(linkPlay);
 
     // console.log(linkPlay);
     // return
@@ -115,6 +116,11 @@ addEventListener('click', e => {
         if( button ) {
             button.focus()
         }
+    }
+
+    if( button ) {
+        const ip     = button.parentElement.getAttribute('data-ip')
+        actionButton(button.getAttribute('data-action'), ip);
     }
 })
 
