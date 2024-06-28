@@ -2,8 +2,10 @@ const icon      = new IconSVG()
 
 const actionButton =( action, link )=>{
 
-    const linkPlay = `${link}/${ Date.now() }.mkv`
+    const linkPlay = `http://${link}/${ Date.now() }.mkv`
 
+    // console.log(linkPlay);
+    // return
     if( action == 'play' ) {
         Android.openWithDefault( linkPlay )
     } 
@@ -204,6 +206,20 @@ Promise.all( [ one(), two(), three() ] ).then( res => {
 })
 
 
- 
+
+const prueba =()=>{
+    return getLIP().then( ip => {
+        // const iplocal = `${ip}:4445`
+        // document.getElementById('ipl').textContent = iplocal
+        // document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
+        // document.getElementById('test')
+
+        document.getElementById('test').textContent = 'tu ip ' + ip
+
+        //return ip
+    })
+}
+
+prueba()
 
 
