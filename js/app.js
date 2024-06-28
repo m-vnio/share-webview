@@ -1,302 +1,231 @@
-const root      = document.getElementById('root')
-const socket    = io('https://l8qn2l7t-5001.brs.devtunnels.ms/');
-const $template = document.createElement('div')
+const icon      = new IconSVG()
 
-const url = new URL(window.location.href);
-const queryParams = url.searchParams;
+const actionButton =( action, link )=>{
 
-const findId    = ( id ) => {
-    const $element = $template.querySelector('#' + id)
-    $element.removeAttribute('id')
-    return $element
-}
+    const linkPlay = `http://${link}/${ Date.now() }.mkv`
+    console.log(linkPlay);
 
-function rand( ...params ){
-    const [ max, min = 0] = params.reverse()
-    return Math.floor(Math.random() * ((max + 1) - min) + min)
-}
-
-function genereteKey ( length = 7 ){
-
-    const upper     = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    const lower     = upper.toLocaleLowerCase()
-    const number    = '1234567890'
-
-    let generate    = [ upper, lower, number ].join('')
+    // console.log(linkPlay);
+    // return
+    if( action == 'play' ) {
+        Android.openWithDefault( linkPlay )
+    } 
     
-    
-    return Array( length ).fill('').map( () => generate[ rand( generate.length - 1 ) ]).join('')
-    
+    else if( action == 'open' ) {
+        Android.openWithApp( linkPlay )
+    }
+
+    else if( action == 'copy' ) {
+        Android.copyText( linkPlay )
+    }
+
+    else if( action == 'share' ) {
+        Android.shareLink( linkPlay )
+    }
 }
 
-function searchParams( query ) {
-    return Object.keys(query).map( key => `${ key }=${ query[ key ] }` ).join('&')
-}
- 
-function renderItemLink ( data = {}, id = null ) {
-
-    const link = `http://${ data.ip }:${4445}`
-    const name = Date.now()
-
-    return `
-        <div class="div_8HE7EX5" data-link="${ link }/${ name }.mkv" data-link-play="${ link }" data-id="id-${ id }" data-focus>
-            <div class="div_6Ej8ouG">
-                <img src="${ data.image ?? '' }" alt="" style="${ data.image ? '' : 'visibility:hidden'}">
-                <p>${ link }/${ name }.mkv</p>
-            </div>
-            <div class="div_9cruItm">
-                <button class="button_q623lM2" data-action="openDefault"><i class="fi fi-rr-play"></i></button>
-                <button class="button_q623lM2" data-action="openWith"><i class="fi fi-rr-resize"></i></button>
-                <button class="button_q623lM2" data-action="copyLink"><i class="fi fi-rr-copy"></i></button>
-                <button class="button_q623lM2" data-action="shareLink"><i class="fi fi-rr-share"></i></button>
-            </div>
-        </div>
-    `
+const att =( array, index )=>{
+    return array.slice( index )[0]
 }
 
-function datetimeAdd() {
-    const date = new Date()
-    date.setDate( date.getDate() + 1 )
-    date.setHours(0)
-    date.setMinutes(0)
-    date.setSeconds(0)
-    date.setMilliseconds(0)
-    return date.getTime()
-}
-
-const component$r =()=> {
-
-    const url = new URL(window.location.href);
-    const queryParams = url.searchParams;
-
-    $template.innerHTML = `
-        <div class="div_OSKBCD">
-            <div class="div_rz0K7v">
-                <div class="div_iSIvEga">
-                    <div class="div_1yWpJY">
-                        <img id="imageProfile" src="https://picsum.photos/40/40">
-                        <input type="text" id="codigoInput" value="" readonly>
-                    </div>
-                    <button id="codigo"><i class="fi fi-rr-password"></i></button>
-                </div>
-                <div id="contenedorButton" class="div_EYpSdgc" >
-                    <div id="itemLink" class="div_ko7wWU">
-                        <div class="element-loader" style="--color:#ffffff; margin-top: 20px"></div>
-                    </div>
+document.getElementById('app').innerHTML = `
+    <header class="header_mO3t4Y0">
+        <div class="div_557EbR4">
+            <div class="div_6pxFPgJ">
+                <img src="" alt="" id="image">
+                <div>
+                    <p style="color:#000000" id="ipl">-</p> 
+                    <p style="color:#000000" id="test">-</p> 
                 </div>
             </div>
-            <div class="div_NHnmszQ">
-                <div id="codigoQR" class="div_1ecjzLK"></div>
+            <div class="div_VWyUlPI" data-ip="">
+                <button class="button_x7jX1VV one" data-action="play">${ icon.get('fi fi-rr-play') }</button>
+                <button class="button_x7jX1VV one" data-action="open">${ icon.get('fi fi-rr-expand-arrows') }</button>
+                <button class="button_x7jX1VV one" data-action="copy">${ icon.get('fi fi-rr-copy') }</button>
+                <button class="button_x7jX1VV one" data-action="share">${ icon.get('fi fi-rr-share') }</button>
             </div>
         </div>
-    `
-    const $element = $template.children[0]
+    </header>
+    <div class="div_DuHLFba" id="datas"></div>
+`
 
-    const itemLink      = findId('itemLink')
+addEventListener('keydown', e => {
+    e.preventDefault()
 
-    const imageProfile  = findId('imageProfile')
+    if( ['ArrowRight', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'Enter'].includes(e.key) ) {
 
-    const codigoQR      = findId('codigoQR')
-    const codigoInput   = findId('codigoInput')
-    const codigo        = findId('codigo')
-    codigoInput.value   = queryParams.get('code')
+        const buttons   = Array.from( document.querySelectorAll('.button_x7jX1VV') )
+        const buttonf   = document.querySelector('.button_x7jX1VV.focus')
+        const index     = buttons.findIndex( button => button == buttonf )
 
-    new QRCode(codigoQR, `${ location.origin }${ location.pathname }?code=${ codigoInput.value }&qr=true`);
-
-    let focusElement = null
-
-    const actionButton =( action, link, linkPlay )=>{
-
-        if( action == 'openDefault' ) {
-            Android.openWithDefault( `${linkPlay}/${ Date.now() }.mkv` )
-        } 
+        const num       = 4
         
-        else if( action == 'openWith' ) {
-            Android.openWithApp( link )
+        document.getElementById('test').textContent = e.key
+
+        if( e.key == 'ArrowRight' ){
+            att( buttons, index + 1) ?? att( buttons, 0 )
+            // const button = buttons.at(index + 1) ?? buttons.at(0)
+            const button = att( buttons, index + 1) ?? att( buttons, 0 )
+            button.focus()
+        }
+        if( e.key == 'ArrowLeft' ) {
+            //buttons.at(index - 1 ).focus()
+            // buttons.at(index - 1 ).focus()
+            att( buttons, index - 1 ).focus()
+        }
+        if( e.key == 'ArrowDown' ) {
+            //const button = buttons.at(index + num) ?? buttons.at(index - buttons.length + num) 
+            const button = att( buttons, index + num ) ?? att( buttons, index - buttons.length + num )
+            button.focus()
+        }
+        if( e.key == 'ArrowUp' ) {
+            // buttons.at(index - 4).focus()
+            att( buttons, index - 4).focus()
         }
 
-        else if( action == 'copyLink' ) {
-            Android.copyText( link )
-        }
-
-        else if( action == 'shareLink' ) {
-            Android.shareLink( link )
+        if( e.key == 'Enter' ) {
+            // const button = buttons.at(index)
+            const button = att( buttons, index)
+            const ip     = button.parentElement.getAttribute('data-ip')
+            actionButton(button.getAttribute('data-action'), ip);
         }
     }
+})
 
-    codigo.addEventListener('click', ()=> {
-        const code = prompt('Ingrese el codigo')
-        if( !code ) return
-        if( code.trim() == '' ) return
-        localStorage.setItem('code', code)
-        location.reload()
-    })
-
-    addEventListener('focusin', e => {
-
-        if( e.target.closest('[ data-action ]') ) {
-            contenedorButton.querySelectorAll('[ data-focus ]').forEach(element => {
-                element.setAttribute('data-focus', '')
-            });
-    
-            e.target.closest('[ data-focus ]').setAttribute('data-focus', true)
-            focusElement = e.target
-        }
-        
-    })
-
-    addEventListener('click', e => {
-
-        const button = e.target.closest('button[ data-action ]')
-
-        if( button ) {
-            const action = button.getAttribute('data-action')
-            const link      = button.closest('[ data-link ]').getAttribute('data-link')
-            const linkPlay  = button.closest('[ data-link ]').getAttribute('data-link-play')
-            actionButton( action, link, linkPlay )
-        } 
-        else if( focusElement ) { setTimeout(()=> focusElement.focus()) }
-
-        
-    })
-
-    addEventListener('keypress', e => {
-        e.preventDefault()
-        console.log('hola');
-    })
-
-    addEventListener('keydown', e => {
-        e.preventDefault()
-
-        if( !focusElement ) return
-
-        const dataFocus = contenedorButton.querySelector('[ data-focus = true ]')
-        const buttons = Array.from( dataFocus.querySelectorAll('button') )
-        const index   = buttons.findIndex( button => button == e.target )
-
-        if( ['ArrowLeft'].includes( e.key ) ) {
-            if( ( index - 1 ) > -1 ) buttons[ index - 1 ].focus()
-            else buttons[ buttons.length - 1 ].focus()
-        }
-
-        else if( ['ArrowRight'].includes( e.key ) ) {
-            if( ( index + 1 ) < buttons.length ) buttons[ index + 1 ].focus()
-            else buttons[0].focus()
-        } 
-
-        else if( ['ArrowDown'].includes( e.key ) ) {
-            const action = buttons[ index ].getAttribute('data-action')
-            const next = dataFocus.nextElementSibling
-
-            if( next ) {
-                next.querySelector(`button[ data-action = ${ action } ]`).focus()
-            } else {
-                contenedorButton.querySelector(`[ data-focus ] button[ data-action = ${ action } ]`).focus()
-            }
-            
-        } 
-
-        else if( ['ArrowUp'].includes( e.key ) ) {
-            const action = buttons[ index ].getAttribute('data-action')
-
-            const previous = dataFocus.previousElementSibling
-
-            if( previous ) {
-                previous.querySelector(`button[ data-action = ${ action } ]`).focus()
-            } else {
-                contenedorButton.querySelector(`[ data-focus ]:last-child button[ data-action = ${ action } ]`).focus()
-            }
-            
-        } 
-
-        else if( [ 'Enter' ].includes( e.key ) ) {
-
-            const action = buttons[index].getAttribute('data-action')
-            const link   = dataFocus.getAttribute('data-link')
-            const linkPlay   = dataFocus.getAttribute('data-link-play')
-            actionButton( action, link, linkPlay )
-           
-        } 
-    })
-
-    fetch( 'https://picsum.photos/40/40' )
-        .then( res => {
-            socket.emit('user-list', JSON.stringify( {
-                ip      : queryParams.get('me-ip') ?? queryParams.get('ip'),
-                code    : queryParams.get('code'),
-                image   : res.url,
-            }))
-
-            imageProfile.setAttribute('src', res.url)
-        })
-    
-
-    let connect = false
-    socket.on('connect', ()=> {
-
-        if( connect == true ) {
-            if( !itemLink.children.length ) {
-                location.reload()
-            }
-        }
-
-        connect = true
-        
-    })
-
-    socket.on('user-list', Data => {
-        
-        itemLink.innerHTML = ''
-
-        JSON.parse( Data ).forEach( data => {
-            if( !data.status ) return
-            if( data.data.code != queryParams.get('code') ) return
-
-            if( socket.id == data.id ) itemLink.insertAdjacentHTML('afterbegin', renderItemLink( data.data, data.id ))
-            else itemLink.insertAdjacentHTML('beforeend', renderItemLink( data.data, data.id ))
-        })
-
-        itemLink.querySelector('button').focus()
-
-    })
-
-    return $element
- }
-
- 
-const component$root =()=>{
-
-    if( queryParams.get('qr') == 'true' ) {
-        if( queryParams.get('code') ) {
-            localStorage.setItem('code', queryParams.get('code'))
-        }
-    }
-
-    if( localStorage.getItem('datetime') ) {
-        if( Date.now() > parseInt( localStorage.getItem('datetime') ) ) {
-            localStorage.removeItem('code')
-            localStorage.removeItem('datetime')
-        }
-    }
-
-    if( !localStorage.getItem('datetime') )
-        localStorage.setItem('datetime', datetimeAdd())
-
-    if( !localStorage.getItem('code') )
-        localStorage.setItem('code', genereteKey(5))
-
-    const queries = {
-        code : localStorage.getItem('code'),
-        ip   : queryParams.get('me-ip') ?? queryParams.get('ip')
-    }
-
-    history.replaceState(null, null, `${ location.origin }${ location.pathname }?${ searchParams( queries ) }`)
-    return component$r()
-    
-}
 
 addEventListener('DOMContentLoaded', ()=> {
 
-    document.getElementById('root').append( component$root() )
-
+    const button = document.querySelector('.button_x7jX1VV')
+    button.focus()
+    
 })
+
+addEventListener('focusin', e => {
+
+    const button = e.target 
+
+    document.querySelectorAll('button.focus').forEach( button => button.classList.remove('focus') )
+    button.classList.add('focus')
+    
+})
+
+addEventListener('click', e => {
+    const button = e.target.closest('button')
+    if( !button ) {
+        const button = document.querySelector('.button_x7jX1VV.focus')
+        if( button ) {
+            button.focus()
+        }
+    }
+
+    if( button ) {
+        const ip     = button.parentElement.getAttribute('data-ip')
+        actionButton(button.getAttribute('data-action'), ip);
+    }
+})
+
+
+addEventListener('contextmenu', e=> {
+   // e.preventDefault()
+})
+
+const one = ()=>{
+    return fetch('https://app.victor01sp.com/ip/get.php')
+        .then( res => res.json() )
+        .then( data => {
+            return data.data
+        }) 
+}
+
+const two =()=>{
+    return new Promise((resolve, reject) => {
+        const url = new URL(location.href)
+        const search = new URLSearchParams( url.search )
+        const ip = search.get('ip')
+        const iplocal = `${ip}:4445`
+        document.getElementById('ipl').textContent = iplocal
+        document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
+        resolve(ip)
+    })
+    
+
+    // return getLIP().then( ip => {
+    //     const iplocal = `${ip}:4445`
+    //     document.getElementById('ipl').textContent = iplocal
+    //     document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
+    //     return ip
+    // })
+}
+
+const three =()=>{
+    return fetch('https://picsum.photos/40/40').then( res => {
+        document.getElementById('image').src       = res.url
+        return res.url
+    })
+}
+
+Promise.all( [ one(), two(), three() ] ).then( res => {
+    const iplocal = `${res[1]}:4445`
+    
+    const emit = {
+        header : {
+            ip : res[0]
+        },
+        body   : {
+            ip     : iplocal,
+            image  : res[2],
+        }
+    }
+
+    const socket    = io('https://l8qn2l7t-5001.brs.devtunnels.ms/');
+
+    socket.on('connect', ()=> {
+
+        socket.emit('connect-list', JSON.stringify(emit))
+        
+    })
+
+    socket.on('connect-list', (data)=> {
+
+        const datas = JSON.parse(data)
+        document.getElementById('datas').innerHTML = datas.map( data => {
+            
+            if( data.id == socket.id ) return ''
+            if( data.data.header.ip != res[0] ) return ''
+
+            return `
+                <div class="div_557EbR4">
+                    <div class="div_6pxFPgJ">
+                        <img src="${ data.data.body.image }" alt="">
+                        <p>${ data.data.body.ip }</p>  
+                    </div>
+                    <div class="div_VWyUlPI" data-ip="${ data.data.body.ip }">
+                        <button class="button_x7jX1VV two" data-action="play">${ icon.get('fi fi-rr-play') }</button>
+                        <button class="button_x7jX1VV two" data-action="open">${ icon.get('fi fi-rr-expand-arrows') }</button>
+                        <button class="button_x7jX1VV two" data-action="copy">${ icon.get('fi fi-rr-copy') }</button>
+                        <button class="button_x7jX1VV two" data-action="share">${ icon.get('fi fi-rr-share') }</button>
+                    </div>
+                </div>
+            `
+        }).join('')
+    })
+})
+
+
+
+const prueba =()=>{
+    return getLIP().then( ip => {
+        // const iplocal = `${ip}:4445`
+        // document.getElementById('ipl').textContent = iplocal
+        // document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
+        // document.getElementById('test')
+
+        document.getElementById('test').textContent = 'tu ip ' + ip
+
+        //return ip
+    })
+}
+
+prueba()
+
+
