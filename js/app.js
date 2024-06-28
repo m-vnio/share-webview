@@ -130,12 +130,23 @@ const one = ()=>{
 }
 
 const two =()=>{
-    return getLIP().then( ip => {
+    return new Promise((resolve, reject) => {
+        const url = new URL(location.href)
+        const search = new URLSearchParams( url.search )
+        const ip = search.get('ip')
         const iplocal = `${ip}:4445`
         document.getElementById('ipl').textContent = iplocal
         document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
-        return ip
+        resolve(ip)
     })
+    
+
+    // return getLIP().then( ip => {
+    //     const iplocal = `${ip}:4445`
+    //     document.getElementById('ipl').textContent = iplocal
+    //     document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
+    //     return ip
+    // })
 }
 
 const three =()=>{
