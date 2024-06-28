@@ -21,6 +21,10 @@ const actionButton =( action, link )=>{
     }
 }
 
+const att =( array, index )=>{
+    return array.slice( index )[0]
+}
+
 document.getElementById('app').innerHTML = `
     <header class="header_mO3t4Y0">
         <div class="div_557EbR4">
@@ -56,20 +60,29 @@ addEventListener('keydown', e => {
         document.getElementById('test').textContent = e.key
 
         if( e.key == 'ArrowRight' ){
-            const button = buttons.at(index + 1) ?? buttons.at(0)
+            att( buttons, index + 1) ?? att( buttons, 0 )
+            // const button = buttons.at(index + 1) ?? buttons.at(0)
+            const button = att( buttons, index + 1) ?? att( buttons, 0 )
             button.focus()
         }
-        if( e.key == 'ArrowLeft' ) buttons.at(index - 1 ).focus()
+        if( e.key == 'ArrowLeft' ) {
+            //buttons.at(index - 1 ).focus()
+            // buttons.at(index - 1 ).focus()
+            att( buttons, index - 1 ).focus()
+        }
         if( e.key == 'ArrowDown' ) {
-            const button = buttons.at(index + num) ?? buttons.at(index - buttons.length + num) 
+            //const button = buttons.at(index + num) ?? buttons.at(index - buttons.length + num) 
+            const button = att( buttons, index + num ) ?? att( buttons, index - buttons.length + num )
             button.focus()
         }
         if( e.key == 'ArrowUp' ) {
-            buttons.at(index - 4).focus()
+            // buttons.at(index - 4).focus()
+            att( buttons, index - 4).focus()
         }
 
         if( e.key == 'Enter' ) {
-            const button = buttons.at(index)
+            // const button = buttons.at(index)
+            const button = att( buttons, index)
             const ip     = button.parentElement.getAttribute('data-ip')
             actionButton(button.getAttribute('data-action'), ip);
         }
