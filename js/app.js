@@ -8,19 +8,19 @@ const actionButton =( action, link )=>{
     // console.log(linkPlay);
     // return
     if( action == 'play' ) {
-        Android.openWithDefault( linkPlay )
+        Android.openWithDefault( linkPlay, "video/*")
     } 
     
     else if( action == 'open' ) {
-        Android.openWithApp( linkPlay )
+        Android.openWithApp( linkPlay, "video/*", "Abrir con")
     }
 
     else if( action == 'copy' ) {
-        Android.copyText( linkPlay )
+        Android.copyText( linkPlay, 'Copiado', 'Link' )
     }
 
     else if( action == 'share' ) {
-        Android.shareLink( linkPlay )
+        Android.shareLink( linkPlay, "text/plain", "Compartir Enlace")
     }
 }
 
@@ -141,7 +141,7 @@ const two =()=>{
     return new Promise((resolve, reject) => {
         const url = new URL(location.href)
         const search = new URLSearchParams( url.search )
-        const ip = search.get('ip')
+        const ip = Android.getLocalIpAddress() //search.get('ip')
         const iplocal = `${ip}:4445`
         document.getElementById('ipl').textContent = iplocal
         document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
