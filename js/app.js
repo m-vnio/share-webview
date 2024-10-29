@@ -117,7 +117,7 @@ addEventListener("DOMContentLoaded", () => {
   document.getElementById("app").innerHTML = `
     <div class="div_j6JA7Rb">
       <div class="button_SEUiBz3"><img id="avatar" src=""></div>
-      <span id="iplocal">15589648</span>
+      <span id="iplocal">-</span>
     </div>
     <div class="div_tEuIgMe">
         <div class="div_uf5lPAu" id="datas" data-keydown-parent></div>
