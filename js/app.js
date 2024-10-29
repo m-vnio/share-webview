@@ -97,8 +97,7 @@ function startApp(data) {
     const button = e.target.closest("button");
     if (button) {
       const ip = button.getAttribute("data-ip");
-      alert(`http://${ip}:4445/${Date.now()}.mkv`)
-      Android.openWithDefault(`http://${ip}:4445/${Date.now()}.mkv`);
+      Android.openWithDefault(`http://${ip}:4445/${Date.now()}.mkv`, "video/*");
     }
   });
 
