@@ -1,231 +1,182 @@
-const icon      = new IconSVG()
+const socket = io("https://l8qn2l7t-5001.brs.devtunnels.ms");
 
-const actionButton =( action, link )=>{
+const promiseUser = new Promise((resolve) => {
+  if (localStorage.getItem("data-user")) {
+    return resolve(JSON.parse(localStorage.getItem("data-user")));
+  }
 
-    const linkPlay = `http://${link}/${ Date.now() }.mkv`
-    console.log(linkPlay);
+  fetch("https://random-data-api.com/api/users/random_user")
+    .then((res) => res.json())
+    .then((data) => {
+      localStorage.setItem("data-user", JSON.stringify(data));
+      resolve(data);
+    });
+});
 
-    // console.log(linkPlay);
-    // return
-    if( action == 'play' ) {
-        Android.openWithDefault( linkPlay, "video/*")
-    } 
-    
-    else if( action == 'open' ) {
-        Android.openWithApp( linkPlay, "video/*", "Abrir con")
+const promiseIp = new Promise((resolve) => {
+  resolve(Android.getLocalIpAddress());
+});
+
+const promiseIpPublic = new Promise((resolve) => {
+  fetch("https://app.victor01sp.com/ip/get.php")
+    .then((res) => res.json())
+    .then((data) => {
+      resolve(data.data);
+    });
+});
+
+const focus = {
+  element: null,
+  parent: null,
+  index: 0,
+};
+
+function startApp(data) {
+  const user = {
+    data: data[0],
+    ip: data[1],
+    ippublic: data[2],
+  };
+
+  const users = [];
+
+  const $users = document.getElementById("datas");
+  document.getElementById("avatar").src = user.data.avatar;
+  document.getElementById("iplocal").textContent = data[1];
+
+  function renderUser(users = []) {
+    console.log(user);
+    $users.innerHTML = [user]
+      .concat(users)
+      .map((user) => {
+        console.log(user);
+        return `<button class="div_bChaKnx" data-ip="${user.ip}" data-keydown><img src="${user.data.avatar}"></button>`;
+      })
+      .join("");
+
+    $users.querySelector("button").focus();
+  }
+
+  // socket.emit
+  socket.on("get-data", (data) => {
+    console.log(data);
+    socket.emit("set-data", {
+      header: {},
+      body: {
+        user,
+      },
+    });
+
+    if (
+      !users.some((user) => user.ip == data.body.user.ip) &&
+      user.ippublic == data.body.user.ippublic
+    ) {
+      users.push(data.body.user);
+      renderUser(users);
     }
+  });
 
-    else if( action == 'copy' ) {
-        Android.copyText( linkPlay, 'Copiado', 'Link' )
+  socket.on("set-data", (data) => {
+    if (
+      !users.some((user) => user.ip == data.body.user.ip) &&
+      user.ippublic == data.body.user.ippublic
+    ) {
+      users.push(data.body.user);
+      renderUser(users);
     }
+  });
 
-    else if( action == 'share' ) {
-        Android.shareLink( linkPlay, "text/plain", "Compartir Enlace")
+  socket.emit("get-data", {
+    header: {},
+    body: {
+      user,
+    },
+  });
+
+  $users.addEventListener("click", (e) => {
+    const button = e.target.closest("button");
+    if (button) {
+      const ip = button.getAttribute("data-ip");
+      Android.openWithDefault(`http://${ip}:4445/${Date.now()}.mkv`);
     }
+  });
+
+  renderUser(users);
 }
 
-const att =( array, index )=>{
-    return array.slice( index )[0]
+function getColumnCount(container, gap = 0, padding = 0) {
+  const total = container.offsetWidth / container.children[0].offsetWidth;
+  const widthGapPadding = (total - 1) * gap + padding * 2;
+
+  return Math.floor(
+    total - Math.floor(widthGapPadding / container.children[0].offsetWidth)
+  );
 }
 
-document.getElementById('app').innerHTML = `
-    <header class="header_mO3t4Y0">
-        <div class="div_557EbR4">
-            <div class="div_6pxFPgJ">
-                <img src="" alt="" id="image">
-                <div>
-                    <p style="color:#000000" id="ipl">-</p> 
-                    <p style="color:#000000" id="test">-</p> 
-                </div>
-            </div>
-            <div class="div_VWyUlPI" data-ip="">
-                <button class="button_x7jX1VV one" data-action="play">${ icon.get('fi fi-rr-play') }</button>
-                <button class="button_x7jX1VV one" data-action="open">${ icon.get('fi fi-rr-expand-arrows') }</button>
-                <button class="button_x7jX1VV one" data-action="copy">${ icon.get('fi fi-rr-copy') }</button>
-                <button class="button_x7jX1VV one" data-action="share">${ icon.get('fi fi-rr-share') }</button>
-            </div>
-        </div>
-    </header>
-    <div class="div_DuHLFba" id="datas"></div>
-`
+addEventListener("DOMContentLoaded", () => {
+  document.getElementById("app").innerHTML = `
+    <div class="div_j6JA7Rb">
+      <div class="button_SEUiBz3"><img id="avatar" src=""></div>
+      <span id="iplocal">15589648</span>
+    </div>
+    <div class="div_tEuIgMe">
+        <div class="div_uf5lPAu" id="datas" data-keydown-parent></div>
+    </div>
+  `;
 
-addEventListener('keydown', e => {
-    e.preventDefault()
+  Promise.all([promiseUser, promiseIp, promiseIpPublic]).then(startApp);
+});
 
-    if( ['ArrowRight', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'Enter'].includes(e.key) ) {
+addEventListener("keydown", (e) => {
+  if (e.key != "Enter") e.preventDefault();
 
-        const buttons   = Array.from( document.querySelectorAll('.button_x7jX1VV') )
-        const buttonf   = document.querySelector('.button_x7jX1VV.focus')
-        const index     = buttons.findIndex( button => button == buttonf )
+  if (document.activeElement.getAttribute("data-keydown") == null) {
+    focus.element.focus();
+    return;
+  }
 
-        const num       = 4
-        
-        document.getElementById('test').textContent = e.key
+  if (
+    !["ArrowRight", "ArrowUp", "ArrowDown", "ArrowLeft", "Enter"].includes(
+      e.key
+    )
+  )
+    return;
 
-        if( e.key == 'ArrowRight' ){
-            att( buttons, index + 1) ?? att( buttons, 0 )
-            // const button = buttons.at(index + 1) ?? buttons.at(0)
-            const button = att( buttons, index + 1) ?? att( buttons, 0 )
-            button.focus()
-        }
-        if( e.key == 'ArrowLeft' ) {
-            //buttons.at(index - 1 ).focus()
-            // buttons.at(index - 1 ).focus()
-            att( buttons, index - 1 ).focus()
-        }
-        if( e.key == 'ArrowDown' ) {
-            //const button = buttons.at(index + num) ?? buttons.at(index - buttons.length + num) 
-            const button = att( buttons, index + num ) ?? att( buttons, index - buttons.length + num )
-            button.focus()
-        }
-        if( e.key == 'ArrowUp' ) {
-            // buttons.at(index - 4).focus()
-            att( buttons, index - 4).focus()
-        }
+  const keydowns = Array.from(document.querySelectorAll("[data-keydown]"));
+  const index = keydowns.findIndex((keydown) => keydown === focus.element);
 
-        if( e.key == 'Enter' ) {
-            // const button = buttons.at(index)
-            const button = att( buttons, index)
-            const ip     = button.parentElement.getAttribute('data-ip')
-            actionButton(button.getAttribute('data-action'), ip);
-        }
+  const num = getColumnCount(focus.parent, 10, 10);
+
+  if (e.key == "ArrowRight") {
+    if (keydowns[index + 1]) {
+      keydowns[index + 1].focus();
     }
-})
+  }
 
-
-addEventListener('DOMContentLoaded', ()=> {
-
-    const button = document.querySelector('.button_x7jX1VV')
-    button.focus()
-    
-})
-
-addEventListener('focusin', e => {
-
-    const button = e.target 
-
-    document.querySelectorAll('button.focus').forEach( button => button.classList.remove('focus') )
-    button.classList.add('focus')
-    
-})
-
-addEventListener('click', e => {
-    const button = e.target.closest('button')
-    if( !button ) {
-        const button = document.querySelector('.button_x7jX1VV.focus')
-        if( button ) {
-            button.focus()
-        }
+  if (e.key == "ArrowLeft") {
+    if (keydowns[index - 1]) {
+      keydowns[index - 1].focus();
     }
+  }
 
-    if( button ) {
-        const ip     = button.parentElement.getAttribute('data-ip')
-        actionButton(button.getAttribute('data-action'), ip);
+  if (e.key == "ArrowUp") {
+    if (keydowns[index - num]) {
+      keydowns[index - num].focus();
+    } else {
+      keydowns[0].focus();
     }
-})
+  }
 
-
-addEventListener('contextmenu', e=> {
-   // e.preventDefault()
-})
-
-const one = ()=>{
-    return fetch('https://app.victor01sp.com/ip/get.php')
-        .then( res => res.json() )
-        .then( data => {
-            return data.data
-        }) 
-}
-
-const two =()=>{
-    return new Promise((resolve, reject) => {
-        const url = new URL(location.href)
-        const search = new URLSearchParams( url.search )
-        const ip = Android.getLocalIpAddress() //search.get('ip')
-        const iplocal = `${ip}:4445`
-        document.getElementById('ipl').textContent = iplocal
-        document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
-        resolve(ip)
-    })
-    
-
-    // return getLIP().then( ip => {
-    //     const iplocal = `${ip}:4445`
-    //     document.getElementById('ipl').textContent = iplocal
-    //     document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
-    //     return ip
-    // })
-}
-
-const three =()=>{
-    return fetch('https://picsum.photos/40/40').then( res => {
-        document.getElementById('image').src       = res.url
-        return res.url
-    })
-}
-
-Promise.all( [ one(), two(), three() ] ).then( res => {
-    const iplocal = `${res[1]}:4445`
-    
-    const emit = {
-        header : {
-            ip : res[0]
-        },
-        body   : {
-            ip     : iplocal,
-            image  : res[2],
-        }
+  if (e.key == "ArrowDown") {
+    if (keydowns[index + num]) {
+      keydowns[index + num].focus();
+    } else {
+      keydowns.reverse()[0].focus();
     }
+  }
+});
 
-    const socket    = io('https://l8qn2l7t-5001.brs.devtunnels.ms/');
-
-    socket.on('connect', ()=> {
-
-        socket.emit('connect-list', JSON.stringify(emit))
-        
-    })
-
-    socket.on('connect-list', (data)=> {
-
-        const datas = JSON.parse(data)
-        document.getElementById('datas').innerHTML = datas.map( data => {
-            
-            if( data.id == socket.id ) return ''
-            if( data.data.header.ip != res[0] ) return ''
-
-            return `
-                <div class="div_557EbR4">
-                    <div class="div_6pxFPgJ">
-                        <img src="${ data.data.body.image }" alt="">
-                        <p>${ data.data.body.ip }</p>  
-                    </div>
-                    <div class="div_VWyUlPI" data-ip="${ data.data.body.ip }">
-                        <button class="button_x7jX1VV two" data-action="play">${ icon.get('fi fi-rr-play') }</button>
-                        <button class="button_x7jX1VV two" data-action="open">${ icon.get('fi fi-rr-expand-arrows') }</button>
-                        <button class="button_x7jX1VV two" data-action="copy">${ icon.get('fi fi-rr-copy') }</button>
-                        <button class="button_x7jX1VV two" data-action="share">${ icon.get('fi fi-rr-share') }</button>
-                    </div>
-                </div>
-            `
-        }).join('')
-    })
-})
-
-
-
-const prueba =()=>{
-    return getLIP().then( ip => {
-        // const iplocal = `${ip}:4445`
-        // document.getElementById('ipl').textContent = iplocal
-        // document.querySelector('[data-ip]').setAttribute('data-ip', iplocal)
-        // document.getElementById('test')
-
-        document.getElementById('test').textContent = 'tu ip ' + ip
-
-        //return ip
-    })
-}
-
-prueba()
-
-
+addEventListener("focusin", (e) => {
+  focus.element = e.target;
+  focus.parent = focus.element.closest("[data-keydown-parent]") || document;
+});
