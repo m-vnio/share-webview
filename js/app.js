@@ -18,11 +18,18 @@ const promiseIp = new Promise((resolve) => {
 });
 
 const promiseIpPublic = new Promise((resolve) => {
-  fetch("https://app.victor01sp.com/ip/get.php")
-    .then((res) => res.json())
+  fetch("https://api.ipify.org?format=json")
+    .then((response) => response.json())
     .then((data) => {
-      resolve(data.data);
-    });
+      console.log("IP pública:", data.ip);
+      resolve(data.ip);
+    })
+    .catch(() => resolve(null));
+  // fetch("https://app.victor01sp.com/ip/get.php")
+  //   .then((res) => res.json())
+  //   .then((data) => {
+  //     resolve(data.data);
+  //   });
 });
 
 const focus = {
